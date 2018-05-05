@@ -1,5 +1,5 @@
 <?php
-$ctx = ibase_connect('localhost:/var/www/database/firebird/test2.fdb', 'sysdba', 'masterkey');
+$ctx = @ibase_pconnect('localhost:/var/www/database/firebird/test2.fdb', 'sysdba', 'masterkey');
 
 if (isset($_GET['rm']) && isset($_GET['id'])) {
 	$pk = (int)$_GET['id'];
@@ -49,7 +49,7 @@ $id = empty($_GET['id']) ? null : intval($_GET['id']);
 <?php if ($laman === 'index'): ?>
 	<?php
 	$kelas = ($id === null) ? null : $id;
-	$q = ibase_query($ctx, "SELECT pk,nis,keterangan FROM perkelas(?) ORDER BY kelas, kelas", $kelas);
+	$q = $ctx ? ibase_query($ctx, "SELECT pk,nis,keterangan FROM perkelas(?) ORDER BY kelas, kelas", $kelas) : null;
 	?>
 
 	<div>
@@ -73,7 +73,7 @@ $id = empty($_GET['id']) ? null : intval($_GET['id']);
 		</thead>
 
 		<tbody>
-			<?php $e = true; while($data = ibase_fetch_assoc($q)): $e = false; ?>
+			<?php $e = true; while($q && $data = ibase_fetch_assoc($q)): $e = false; ?>
 				<tr>
 					<td><?php echo $data['NIS'] ?></td>
 					<td><?php echo $data['KETERANGAN'] ?></td>
@@ -99,8 +99,8 @@ $id = empty($_GET['id']) ? null : intval($_GET['id']);
 	<?php
 	$data = false;
 	if ($laman === 'ubah' && $id !== null) {
-		$q = ibase_query($ctx, "SELECT * FROM siswa WHERE pk = ?", $id);
-		$data = ibase_fetch_assoc($q); // empty = false
+		$q = $ctx ? ibase_query($ctx, "SELECT * FROM siswa WHERE pk = ?", $id) : null;
+		$data = $q ? ibase_fetch_assoc($q) : false; // empty = false
 	}
 
 	if ($data === false) $data = new stdClass;
